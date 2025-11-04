@@ -1,0 +1,53 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "iteration": 1710000000000,
+  "links": [],
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Gateway - Request Rate (req/s)",
+      "targets": [
+        {"expr": "sum(rate(http_server_requests_seconds_count{application=\"gateway-service\"}[1m]))", "legendFormat": "req/s"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+    },
+    {
+      "type": "timeseries",
+      "title": "Gateway - 5xx Error Rate",
+      "targets": [
+        {"expr": "sum(rate(http_server_requests_seconds_count{application=\"gateway-service\",status=~\"5..\"}[1m]))", "legendFormat": "5xx/s"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+    },
+    {
+      "type": "timeseries",
+      "title": "Gateway - p95 Latency (s)",
+      "targets": [
+        {"expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_requests_seconds_bucket{application=\"gateway-service\"}[5m])))", "legendFormat": "p95"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+    },
+    {
+      "type": "timeseries",
+      "title": "Per-route Request Rate",
+      "targets": [
+        {"expr": "sum by (uri) (rate(http_server_requests_seconds_count{application=\"gateway-service\"}[1m]))", "legendFormat": "{{uri}}"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 37,
+  "style": "dark",
+  "tags": ["gateway"],
+  "templating": {"list": []},
+  "time": {"from": "now-6h", "to": "now"},
+  "timezone": "browser",
+  "title": "Gateway Performance",
+  "uid": "gateway-perf",
+  "version": 1
+}
