@@ -47,3 +47,10 @@ hpa:
   minReplicas: 2
   maxReplicas: 10
   targetCPUUtilizationPercentage: 60
+
+# Optional ServiceMonitor (for kube-prometheus-stack users)
+monitoring:
+  serviceMonitor:
+    enabled: false
+    namespace: ""
+    extraLabels: {}

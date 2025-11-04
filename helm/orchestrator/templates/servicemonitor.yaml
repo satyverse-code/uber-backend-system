@@ -1,0 +1,20 @@
+{{- if .Values.monitoring.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "orchestrator.fullname" . }}
+  labels:
+    release: prometheus
+    {{- toYaml .Values.monitoring.serviceMonitor.extraLabels | nindent 4 }}
+spec:
+  namespaceSelector:
+    matchNames:
+      - {{ .Values.monitoring.serviceMonitor.namespace | default .Release.Namespace }}
+  selector:
+    matchLabels:
+      app: {{ include "orchestrator.name" . }}
+  endpoints:
+    - port: http
+      path: /actuator/prometheus
+      interval: 30s
+{{- end }}
