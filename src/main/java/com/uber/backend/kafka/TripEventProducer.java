@@ -1,8 +1,10 @@
 package com.uber.backend.kafka;
 
 import com.uber.backend.events.TripCreatedEvent;
+import com.uber.backend.tracing.KafkaTracing;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.apache.kafka.clients.producer.ProducerRecord;
 
 @Service
 public class TripEventProducer {
@@ -15,6 +17,8 @@ public class TripEventProducer {
     }
 
     public void publishTripCreated(TripCreatedEvent event) {
-        kafkaTemplate.send(TOPIC_TRIP_CREATED, event.getEventId(), event);
+        ProducerRecord<String, Object> record = new ProducerRecord<>(TOPIC_TRIP_CREATED, event.getEventId(), event);
+        KafkaTracing.inject(record);
+        kafkaTemplate.send(record);
     }
 }
