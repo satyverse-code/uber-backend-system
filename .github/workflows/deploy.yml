@@ -11,6 +11,10 @@ on:
         description: "Docker image tag for all services"
         required: true
         default: "latest"
+      applyAlerts:
+        description: "Apply Prometheus alert rules (k8s/alerts/prometheus-rules.yaml)"
+        required: false
+        default: "true"
   push:
     branches: [ "week-6" ]
     paths:
@@ -60,3 +64,32 @@ jobs:
           helm upgrade --install notification helm/notification \
             --namespace ${{ github.event.inputs.environment || 'uber' }} \
             --set image.tag=${{ github.event.inputs.imageTag || 'latest' }}
+
+      - name: Wait for deployments to become ready
+        run: |
+          ns=${{ github.event.inputs.environment || 'uber' }}
+          # rollout names follow chart fullname: <chart>-<release>
+          kubectl rollout status deploy/booking-booking -n $ns --timeout=180s || true
+          kubectl rollout status deploy/orchestrator-orchestrator -n $ns --timeout=180s || true
+          kubectl rollout status deploy/notification-notification -n $ns --timeout=180s || true
+
+      - name: Show pods and services
+        run: |
+          ns=${{ github.event.inputs.environment || 'uber' }}
+          kubectl get pods -n $ns -o wide || true
+          kubectl get svc -n $ns || true
+
+      - name: Apply Prometheus alert rules (optional)
+        if: ${{ github.event.inputs.applyAlerts == 'true' }}
+        run: |
+          ns=${{ github.event.inputs.environment || 'uber' }}
+          if [ -f k8s/alerts/prometheus-rules.yaml ]; then
+            kubectl apply -n $ns -f k8s/alerts/prometheus-rules.yaml || true
+          fi
+
+      - name: Print ServiceMonitors, HPAs, and KEDA objects (if present)
+        run: |
+          ns=${{ github.event.inputs.environment || 'uber' }}
+          kubectl get servicemonitor -n $ns || true
+          kubectl get hpa -n $ns || true
+          kubectl get scaledobject -n $ns || true
