@@ -1,0 +1,87 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: trip-created
+  labels:
+    strimzi.io/cluster: uber-kafka
+spec:
+  partitions: 3
+  replicas: 1
+  topicName: trip_created
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: driver-assigned
+  labels:
+    strimzi.io/cluster: uber-kafka
+spec:
+  partitions: 3
+  replicas: 1
+  topicName: driver_assigned
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: trip-completed
+  labels:
+    strimzi.io/cluster: uber-kafka
+spec:
+  partitions: 3
+  replicas: 1
+  topicName: trip_completed
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: payment-completed
+  labels:
+    strimzi.io/cluster: uber-kafka
+spec:
+  partitions: 3
+  replicas: 1
+  topicName: payment_completed
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: trip-created-dlt
+  labels:
+    strimzi.io/cluster: uber-kafka
+spec:
+  partitions: 3
+  replicas: 1
+  topicName: trip_created.DLT
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: driver-assigned-dlt
+  labels:
+    strimzi.io/cluster: uber-kafka
+spec:
+  partitions: 3
+  replicas: 1
+  topicName: driver_assigned.DLT
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: trip-completed-dlt
+  labels:
+    strimzi.io/cluster: uber-kafka
+spec:
+  partitions: 3
+  replicas: 1
+  topicName: trip_completed.DLT
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: payment-completed-dlt
+  labels:
+    strimzi.io/cluster: uber-kafka
+spec:
+  partitions: 3
+  replicas: 1
+  topicName: payment_completed.DLT
