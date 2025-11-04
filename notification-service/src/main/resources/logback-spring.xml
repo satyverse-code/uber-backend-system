@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <property name="APP_NAME" value="notification-service"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp/>
+                <pattern>
+                    <pattern>{"level":"%level","logger":"%logger{36}","thread":"%thread"}</pattern>
+                </pattern>
+                <arguments/>
+                <mdc/>
+                <jsonProvider class="net.logstash.logback.composite.loggingevent.MessageJsonProvider"/>
+                <jsonProvider class="net.logstash.logback.composite.loggingevent.StackTraceJsonProvider"/>
+                <provider class="net.logstash.logback.composite.GlobalCustomFieldsJsonProvider">
+                    <customFields>{"service":"${APP_NAME}"}</customFields>
+                </provider>
+            </providers>
+        </encoder>
+    </appender>
+
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>localhost:5000</destination>
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp/>
+                <pattern>
+                    <pattern>{"level":"%level","logger":"%logger{36}","thread":"%thread","traceId":"%X{traceId:-}","spanId":"%X{spanId:-}"}</pattern>
+                </pattern>
+                <arguments/>
+                <mdc/>
+                <jsonProvider class="net.logstash.logback.composite.loggingevent.MessageJsonProvider"/>
+                <jsonProvider class="net.logstash.logback.composite.loggingevent.StackTraceJsonProvider"/>
+                <provider class="net.logstash.logback.composite.GlobalCustomFieldsJsonProvider">
+                    <customFields>{"service":"${APP_NAME}"}</customFields>
+                </provider>
+            </providers>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="LOGSTASH"/>
+    </root>
+</configuration>
