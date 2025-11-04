@@ -1,0 +1,25 @@
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: kafka-broker-pod-delete
+  namespace: uber
+spec:
+  appinfo:
+    appns: uber
+    applabel: "strimzi.io/name=uber-kafka-kafka"
+    appkind: statefulset
+  annotationCheck: "false"
+  engineState: "active"
+  chaosServiceAccount: litmus-admin
+  jobCleanUpPolicy: retain
+  experiments:
+    - name: pod-delete
+      spec:
+        components:
+          env:
+            - name: TOTAL_CHAOS_DURATION
+              value: "60"
+            - name: CHAOS_INTERVAL
+              value: "10"
+            - name: PODS_AFFECTED_PERC
+              value: "100"

@@ -1,0 +1,25 @@
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: postgres-network-latency
+  namespace: uber
+spec:
+  appinfo:
+    appns: uber
+    applabel: "app.kubernetes.io/name=postgresql"
+    appkind: statefulset
+  annotationCheck: "false"
+  engineState: "active"
+  chaosServiceAccount: litmus-admin
+  jobCleanUpPolicy: retain
+  experiments:
+    - name: pod-network-latency
+      spec:
+        components:
+          env:
+            - name: TOTAL_CHAOS_DURATION
+              value: "60"
+            - name: NETWORK_LATENCY
+              value: "2000"  # milliseconds
+            - name: PODS_AFFECTED_PERC
+              value: "100"
