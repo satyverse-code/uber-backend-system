@@ -65,3 +65,11 @@ monitoring:
 pdb:
   enabled: true
   minAvailable: 1
+
+serviceAccount:
+  create: true
+  annotations: {}
+
+iam:
+  useIRSA: false
+  roleArn: ""
