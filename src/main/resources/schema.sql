@@ -3,3 +3,20 @@ CREATE TABLE IF NOT EXISTS riders (
     name VARCHAR(100) NOT NULL,
     phone VARCHAR(20) NOT NULL UNIQUE
 );
+
+CREATE TABLE IF NOT EXISTS drivers (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    car_number VARCHAR(20) NOT NULL UNIQUE,
+    status VARCHAR(20) NOT NULL DEFAULT 'AVAILABLE'
+);
+
+CREATE TABLE IF NOT EXISTS rides (
+    id BIGSERIAL PRIMARY KEY,
+    rider_id BIGINT NOT NULL REFERENCES riders(id),
+    driver_id BIGINT REFERENCES drivers(id),
+    source VARCHAR(255) NOT NULL,
+    destination VARCHAR(255) NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    created_at TIMESTAMP NOT NULL
+);
