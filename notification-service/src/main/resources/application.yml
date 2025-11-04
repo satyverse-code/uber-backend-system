@@ -27,3 +27,9 @@ management:
   metrics:
     tags:
       application: notification-service
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      endpoint: http://localhost:4317

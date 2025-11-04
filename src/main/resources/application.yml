@@ -40,3 +40,9 @@ management:
   metrics:
     tags:
       application: booking-service
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      endpoint: http://localhost:4317

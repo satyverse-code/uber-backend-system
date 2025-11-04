@@ -22,6 +22,25 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
+resilience4j:
+  circuitbreaker:
+    instances:
+      driverReserveCB:
+        failureRateThreshold: 50
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 20
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+  retry:
+    instances:
+      driverReserveCB:
+        maxAttempts: 3
+        waitDuration: 300ms
+  timelimiter:
+    instances:
+      driverReserveCB:
+        timeoutDuration: 2s
+
 management:
   endpoints:
     web:
@@ -30,3 +49,9 @@ management:
   metrics:
     tags:
       application: orchestrator-service
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      endpoint: http://localhost:4317
