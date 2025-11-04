@@ -20,6 +20,12 @@ public class Saga {
     @Column(name = "driver_id")
     private Long driverId;
 
+    @Column(name = "pickup_lat")
+    private Double pickupLat;
+
+    @Column(name = "pickup_lng")
+    private Double pickupLng;
+
     @Column(nullable = false)
     private String state; // STARTED, DRIVER_RESERVED, PAYMENT_AUTHORIZED, COMMITTED, COMPENSATING, CANCELLED
 
@@ -43,6 +49,10 @@ public class Saga {
     public void setTripId(Long tripId) { this.tripId = tripId; }
     public Long getDriverId() { return driverId; }
     public void setDriverId(Long driverId) { this.driverId = driverId; }
+    public Double getPickupLat() { return pickupLat; }
+    public void setPickupLat(Double pickupLat) { this.pickupLat = pickupLat; }
+    public Double getPickupLng() { return pickupLng; }
+    public void setPickupLng(Double pickupLng) { this.pickupLng = pickupLng; }
     public String getState() { return state; }
     public void setState(String state) { this.state = state; }
     public Instant getUpdatedAt() { return updatedAt; }

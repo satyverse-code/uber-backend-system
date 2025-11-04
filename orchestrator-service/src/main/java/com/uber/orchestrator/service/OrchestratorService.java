@@ -1,6 +1,7 @@
 package com.uber.orchestrator.service;
 
 import com.uber.orchestrator.client.BookingClient;
+import com.uber.orchestrator.client.DriverClient;
 import com.uber.orchestrator.dto.StartSagaRequest;
 import com.uber.orchestrator.saga.Saga;
 import com.uber.orchestrator.saga.SagaRepository;
@@ -17,10 +18,12 @@ public class OrchestratorService {
 
     private final SagaRepository sagaRepository;
     private final BookingClient bookingClient;
+    private final DriverClient driverClient;
 
-    public OrchestratorService(SagaRepository sagaRepository, BookingClient bookingClient) {
+    public OrchestratorService(SagaRepository sagaRepository, BookingClient bookingClient, DriverClient driverClient) {
         this.sagaRepository = sagaRepository;
         this.bookingClient = bookingClient;
+        this.driverClient = driverClient;
     }
 
     @Transactional
@@ -28,6 +31,8 @@ public class OrchestratorService {
         String sagaId = UUID.randomUUID().toString();
         Long tripId = bookingClient.createRide(req.getRiderId(), req.getPickup(), req.getDropoff());
         Saga saga = new Saga(sagaId, tripId, "STARTED");
+        saga.setPickupLat(req.getLat());
+        saga.setPickupLng(req.getLng());
         saga.setUpdatedAt(Instant.now());
         sagaRepository.save(saga);
         return Map.of("sagaId", sagaId, "tripId", tripId, "state", saga.getState());
@@ -36,9 +41,18 @@ public class OrchestratorService {
     @Transactional
     public Map<String, Object> reserveDriver(String sagaId) {
         Saga saga = getSagaOrThrow(sagaId);
-        // TODO: call Driver service to reserve nearest driver (Week 4 Step 2)
-        saga.setState("DRIVER_RESERVED");
-        saga.setDriverId(0L); // placeholder until real driver assignment
+        Long driverId = driverClient.reserveNearest(
+                saga.getPickupLat(),
+                saga.getPickupLng(),
+                5000.0
+        );
+        if (driverId == null) {
+            saga.setState("CANCELLED");
+            saga.setLastError("NO_DRIVER_AVAILABLE");
+        } else {
+            saga.setDriverId(driverId);
+            saga.setState("DRIVER_RESERVED");
+        }
         saga.setUpdatedAt(Instant.now());
         sagaRepository.save(saga);
         return Map.of("sagaId", sagaId, "tripId", saga.getTripId(), "state", saga.getState());

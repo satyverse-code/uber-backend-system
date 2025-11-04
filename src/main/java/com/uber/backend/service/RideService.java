@@ -9,6 +9,7 @@ import com.uber.backend.events.DriverAssignedEvent;
 import com.uber.backend.kafka.TripEventProducer;
 import com.uber.backend.store.ProcessedEvent;
 import com.uber.backend.store.ProcessedEventRepository;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,13 +25,16 @@ public class RideService {
     private final RideRepository rideRepository;
     private final TripEventProducer tripEventProducer;
     private final ProcessedEventRepository processedEventRepository;
+    private final MeterRegistry meterRegistry;
 
     public RideService(RideRepository rideRepository,
                        TripEventProducer tripEventProducer,
-                       ProcessedEventRepository processedEventRepository) {
+                       ProcessedEventRepository processedEventRepository,
+                       MeterRegistry meterRegistry) {
         this.rideRepository = rideRepository;
         this.tripEventProducer = tripEventProducer;
         this.processedEventRepository = processedEventRepository;
+        this.meterRegistry = meterRegistry;
     }
 
     @Transactional
@@ -43,6 +47,8 @@ public class RideService {
         ride.setCreatedAt(LocalDateTime.now());
 
         Ride saved = rideRepository.save(ride);
+
+        meterRegistry.counter("trips_created_total").increment();
 
         TripCreatedEvent event = new TripCreatedEvent(
                 UUID.randomUUID().toString(),
@@ -77,6 +83,7 @@ public class RideService {
             ride.setDriverId(driverId);
             ride.setStatus("ASSIGNED");
             rideRepository.save(ride);
+            meterRegistry.counter("trips_assigned_total").increment();
         }
         processedEventRepository.save(new ProcessedEvent(eventId, "driver_assigned"));
     }
