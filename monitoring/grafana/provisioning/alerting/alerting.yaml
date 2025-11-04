@@ -1,0 +1,19 @@
+apiVersion: 1
+contactPoints:
+  - orgId: 1
+    name: default-contact-point
+    receivers:
+      - uid: slack-default
+        type: slack
+        settings:
+          url: ${GRAFANA_SLACK_WEBHOOK_URL}
+          recipient: "#alerts"
+          title: "[[ .Status ]] {{ .CommonLabels.alertname }}"
+          text: >
+            {{ range .Alerts }}*{{ .Annotations.summary }}*\n{{ .Annotations.description }}\nLabels: {{ .Labels }}\n{{ end }}
+notificationPolicies:
+  - orgId: 1
+    receiver: default-contact-point
+    group_by:
+      - alertname
+    routes: []
