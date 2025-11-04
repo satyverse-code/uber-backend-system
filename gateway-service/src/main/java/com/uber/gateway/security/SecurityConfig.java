@@ -25,6 +25,9 @@ public class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(reg -> reg
                         .pathMatchers("/actuator/**").permitAll()
+                        .pathMatchers("/api/booking/**").hasAuthority("SCOPE_booking.read")
+                        .pathMatchers("/api/orchestrator/**").hasAuthority("SCOPE_orchestrator.write")
+                        .pathMatchers("/api/notification/**").hasAuthority("SCOPE_notification.send")
                         .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))

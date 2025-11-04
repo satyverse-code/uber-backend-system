@@ -40,6 +40,18 @@ spec:
               value: "{{ .Values.env.RATE_LIMIT_REPLENISH }}"
             - name: RATE_LIMIT_BURST
               value: "{{ .Values.env.RATE_LIMIT_BURST }}"
+            - name: RATE_LIMIT_BOOKING_REPLENISH
+              value: "{{ .Values.env.RATE_LIMIT_BOOKING_REPLENISH }}"
+            - name: RATE_LIMIT_BOOKING_BURST
+              value: "{{ .Values.env.RATE_LIMIT_BOOKING_BURST }}"
+            - name: RATE_LIMIT_ORCH_REPLENISH
+              value: "{{ .Values.env.RATE_LIMIT_ORCH_REPLENISH }}"
+            - name: RATE_LIMIT_ORCH_BURST
+              value: "{{ .Values.env.RATE_LIMIT_ORCH_BURST }}"
+            - name: RATE_LIMIT_NOTIF_REPLENISH
+              value: "{{ .Values.env.RATE_LIMIT_NOTIF_REPLENISH }}"
+            - name: RATE_LIMIT_NOTIF_BURST
+              value: "{{ .Values.env.RATE_LIMIT_NOTIF_BURST }}"
           resources:
             requests:
               memory: {{ .Values.resources.requests.memory }}

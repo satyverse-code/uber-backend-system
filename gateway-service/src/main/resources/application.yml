@@ -17,11 +17,6 @@ spring:
     gateway:
       default-filters:
         - PreserveHostHeader
-        - name: RequestRateLimiter
-          args:
-            redis-rate-limiter.replenishRate: ${RATE_LIMIT_REPLENISH:50}
-            redis-rate-limiter.burstCapacity: ${RATE_LIMIT_BURST:100}
-            key-resolver: "#{@remoteAddressResolver}"
       routes:
         - id: booking
           uri: http://booking:8080
@@ -29,18 +24,33 @@ spring:
             - Path=/api/booking/**
           filters:
             - StripPrefix=1
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: ${RATE_LIMIT_BOOKING_REPLENISH:40}
+                redis-rate-limiter.burstCapacity: ${RATE_LIMIT_BOOKING_BURST:80}
+                key-resolver: "#{@remoteAddressResolver}"
         - id: orchestrator
           uri: http://orchestrator:8090
           predicates:
             - Path=/api/orchestrator/**
           filters:
             - StripPrefix=1
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: ${RATE_LIMIT_ORCH_REPLENISH:20}
+                redis-rate-limiter.burstCapacity: ${RATE_LIMIT_ORCH_BURST:40}
+                key-resolver: "#{@remoteAddressResolver}"
         - id: notification
           uri: http://notification:8092
           predicates:
             - Path=/api/notification/**
           filters:
             - StripPrefix=1
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: ${RATE_LIMIT_NOTIF_REPLENISH:30}
+                redis-rate-limiter.burstCapacity: ${RATE_LIMIT_NOTIF_BURST:60}
+                key-resolver: "#{@remoteAddressResolver}"
   main:
     web-application-type: reactive
 
