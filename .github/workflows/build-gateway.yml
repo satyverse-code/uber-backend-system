@@ -1,0 +1,61 @@
+name: Build Gateway
+
+on:
+  push:
+    branches: [ "week-6", "week-7" ]
+    paths:
+      - 'gateway-service/**'
+      - '.github/workflows/build-gateway.yml'
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    env:
+      REGISTRY: ${{ secrets.REGISTRY }}
+      REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+      REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+      IMAGE_NAME: gateway-service
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build jar
+        run: |
+          cd gateway-service
+          ./mvnw -q -DskipTests -Pprod -e -U clean package || mvn -q -DskipTests clean package
+
+      - name: Set image tag
+        id: vars
+        run: echo "tag=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+      - name: Build Docker image
+        run: |
+          docker build -t $REGISTRY/$IMAGE_NAME:${{ steps.vars.outputs.tag }} -f gateway-service/Dockerfile gateway-service
+
+      - name: Login to registry
+        if: env.REGISTRY != ''
+        run: echo "$REGISTRY_PASSWORD" | docker login "$REGISTRY" -u "$REGISTRY_USERNAME" --password-stdin
+
+      - name: Push image
+        if: env.REGISTRY != ''
+        run: docker push $REGISTRY/$IMAGE_NAME:${{ steps.vars.outputs.tag }}
+
+      - name: Print image reference
+        run: echo "Pushed image: $REGISTRY/$IMAGE_NAME:${{ steps.vars.outputs.tag }}"
+
+      - name: Update Helm values with new image tag and push
+        if: env.REGISTRY != ''
+        run: |
+          sed -i "s/^  tag:.*/  tag: \"${{ steps.vars.outputs.tag }}\"/" helm/gateway/values.yaml
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git add helm/gateway/values.yaml
+          git commit -m "ci: bump gateway image tag to ${{ steps.vars.outputs.tag }}" || echo "No changes to commit"
+          git push

@@ -1,0 +1,5 @@
+apiVersion: v2
+name: gateway
+description: Spring Cloud Gateway for Uber backend
+version: 0.1.0
+appVersion: "1.0.0"

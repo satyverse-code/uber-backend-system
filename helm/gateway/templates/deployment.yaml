@@ -1,8 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "booking.fullname" . }}
-  labels: {{- include "booking.labels" . | nindent 4 }}
+  name: {{ include "gateway.fullname" . }}
+  labels: {{- include "gateway.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   strategy:
@@ -12,16 +12,16 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: {{ include "booking.name" . }}
+      app: {{ include "gateway.name" . }}
   template:
     metadata:
       labels:
-        app: {{ include "booking.name" . }}
+        app: {{ include "gateway.name" . }}
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     spec:
-      serviceAccountName: {{ include "booking.serviceAccountName" . }}
+      serviceAccountName: {{ include "gateway.serviceAccountName" . }}
       containers:
-        - name: booking
+        - name: gateway
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
@@ -33,13 +33,6 @@ spec:
             limits:
               memory: {{ .Values.resources.limits.memory }}
               cpu: {{ .Values.resources.limits.cpu }}
-          env:
-            - name: SPRING_PROFILES_ACTIVE
-              value: "{{ .Values.env.SPRING_PROFILES_ACTIVE }}"
-            - name: SPRING_DATASOURCE_URL
-              value: "{{ .Values.env.SPRING_DATASOURCE_URL }}"
-            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
-              value: "{{ .Values.env.SPRING_KAFKA_BOOTSTRAP_SERVERS }}"
           readinessProbe:
             httpGet:
               path: {{ .Values.readinessProbe.httpGet.path }}
