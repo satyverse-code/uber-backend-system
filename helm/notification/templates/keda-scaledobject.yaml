@@ -1,0 +1,23 @@
+{{- if .Values.keda.enabled }}
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "notification.fullname" . }}
+  labels: {{- include "notification.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    name: {{ include "notification.fullname" . }}
+  pollingInterval: {{ .Values.keda.pollingInterval }}
+  cooldownPeriod: {{ .Values.keda.cooldownPeriod }}
+  minReplicaCount: {{ .Values.keda.minReplicaCount }}
+  maxReplicaCount: {{ .Values.keda.maxReplicaCount }}
+  triggers:
+    - type: kafka
+      metadata:
+        bootstrapServers: {{ .Values.keda.bootstrapServers }}
+        consumerGroup: {{ .Values.keda.consumerGroup }}
+        topic: {{ (first .Values.keda.topics) }}
+        lagThreshold: "{{ .Values.keda.lagThreshold }}"
+      authenticationRef:
+        name: keda-kafka-auth-none
+{{- end }}
