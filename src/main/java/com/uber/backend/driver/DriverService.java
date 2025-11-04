@@ -9,9 +9,11 @@ import java.util.List;
 public class DriverService {
 
     private final DriverRepository driverRepository;
+    private final DriverCacheService driverCacheService;
 
-    public DriverService(DriverRepository driverRepository) {
+    public DriverService(DriverRepository driverRepository, DriverCacheService driverCacheService) {
         this.driverRepository = driverRepository;
+        this.driverCacheService = driverCacheService;
     }
 
     @Transactional
@@ -27,6 +29,7 @@ public class DriverService {
         }
         driver.setStatus("BUSY");
         driverRepository.save(driver);
+        driverCacheService.putDriverSnapshot(driver.getId(), driver.getStatus(), driver.getCurrentLat(), driver.getCurrentLong());
         return new ReservedDriver(driver.getId(), driver.getName(), driver.getCarNumber());
     }
 

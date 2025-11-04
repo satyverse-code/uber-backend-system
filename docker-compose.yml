@@ -22,21 +22,23 @@ services:
       - "2181:2181"
 
   kafka:
-    image: confluentinc/cp-kafka:7.6.1
+    image: bitnami/kafka:3.6.1
     container_name: uber_kafka
-    depends_on:
-      - zookeeper
+    restart: always
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      ALLOW_PLAINTEXT_LISTENER: "yes"
     ports:
       - "9092:9092"
     volumes:
-      - kafka_data:/var/lib/kafka/data
+      - kafka_data:/bitnami/kafka
+
+  redis:
+    image: redis:7-alpine
+    container_name: uber_redis
+    ports:
+      - "6379:6379"
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
