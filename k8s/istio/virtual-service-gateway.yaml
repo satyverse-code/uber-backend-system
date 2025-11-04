@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: gateway-traffic
+  namespace: uber
+spec:
+  hosts:
+    - "gateway.example.com"
+  gateways:
+    - uber-gateway
+  http:
+    - match:
+        - uri:
+            prefix: "/"
+      route:
+        - destination:
+            host: gateway-{{ .Release.Name }}.uber.svc.cluster.local
+            port:
+              number: 8085
