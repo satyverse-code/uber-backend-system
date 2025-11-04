@@ -1,0 +1,49 @@
+replicaCount: 2
+
+image:
+  repository: your-registry/orchestrator-service
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8090
+
+ingress:
+  enabled: true
+  hostname: orchestrator.example.com
+  annotations:
+    kubernetes.io/ingress.class: nginx
+
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "200m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8090
+  initialDelaySeconds: 10
+  periodSeconds: 10
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8090
+  initialDelaySeconds: 30
+  periodSeconds: 20
+
+env:
+  SPRING_PROFILES_ACTIVE: k8s
+  SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/uberdb
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 60
