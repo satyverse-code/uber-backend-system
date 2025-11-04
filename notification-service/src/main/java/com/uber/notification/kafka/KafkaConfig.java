@@ -23,6 +23,7 @@ public class KafkaConfig {
                 (record, ex) -> new TopicPartition(record.topic() + ".DLT", record.partition()));
         DefaultErrorHandler errorHandler = new DefaultErrorHandler(recoverer, new FixedBackOff(1000L, 3L));
         factory.setCommonErrorHandler(errorHandler);
+        factory.setConcurrency(3);
         return factory;
     }
 }
