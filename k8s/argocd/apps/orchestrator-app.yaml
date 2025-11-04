@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: orchestrator-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/satyverse-code/uber-backend-system.git
+    targetRevision: week-6
+    path: helm/orchestrator
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: uber
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
