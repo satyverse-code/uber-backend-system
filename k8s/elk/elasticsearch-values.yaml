@@ -1,0 +1,20 @@
+replicas: 1
+minimumMasterNodes: 1
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+volumeClaimTemplate:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 10Gi
+esJavaOpts: "-Xms512m -Xmx512m"
+extraEnvs:
+  - name: discovery.type
+    value: single-node
+  - name: xpack.security.enabled
+    value: "false"
