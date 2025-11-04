@@ -26,6 +26,11 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.port }}
+          {{- if or .Values.secrets.create .Values.secrets.name }}
+          envFrom:
+            - secretRef:
+                name: {{ include "booking.awsSecretName" . }}
+          {{- end }}
           resources:
             requests:
               memory: {{ .Values.resources.requests.memory }}

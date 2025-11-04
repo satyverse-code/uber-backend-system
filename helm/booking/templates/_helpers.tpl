@@ -16,3 +16,11 @@ heritage: {{ .Release.Service }}
 {{- define "booking.serviceAccountName" -}}
 {{ include "booking.fullname" . }}-sa
 {{- end -}}
+
+{{- define "booking.awsSecretName" -}}
+{{- if .Values.secrets.name -}}
+{{ .Values.secrets.name }}
+{{- else -}}
+{{ printf "%s-aws" (include "booking.fullname" .) }}
+{{- end -}}
+{{- end -}}

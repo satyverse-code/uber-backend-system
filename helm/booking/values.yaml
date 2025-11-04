@@ -49,6 +49,13 @@ env:
   AWS_ACCESS_KEY_ID: ""
   AWS_SECRET_ACCESS_KEY: ""
 
+secrets:
+  create: false
+  name: ""
+  data:
+    AWS_ACCESS_KEY_ID: ""
+    AWS_SECRET_ACCESS_KEY: ""
+
 hpa:
   enabled: true
   minReplicas: 2
