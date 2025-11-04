@@ -17,11 +17,11 @@ ingress:
 
 resources:
   requests:
-    memory: "256Mi"
+    memory: "192Mi"
     cpu: "200m"
   limits:
-    memory: "512Mi"
-    cpu: "500m"
+    memory: "384Mi"
+    cpu: "400m"
 
 readinessProbe:
   httpGet:
@@ -45,8 +45,8 @@ env:
 hpa:
   enabled: true
   minReplicas: 2
-  maxReplicas: 10
-  targetCPUUtilizationPercentage: 60
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 75
 
 # Optional ServiceMonitor (for kube-prometheus-stack users)
 monitoring:

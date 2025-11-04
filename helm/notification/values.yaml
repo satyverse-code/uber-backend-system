@@ -17,11 +17,11 @@ ingress:
 
 resources:
   requests:
-    memory: "256Mi"
+    memory: "192Mi"
     cpu: "200m"
   limits:
-    memory: "512Mi"
-    cpu: "500m"
+    memory: "384Mi"
+    cpu: "400m"
 
 readinessProbe:
   httpGet:
@@ -45,19 +45,19 @@ env:
 hpa:
   enabled: true
   minReplicas: 2
-  maxReplicas: 10
-  targetCPUUtilizationPercentage: 60
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 75
 
 # KEDA-based autoscaling by Kafka lag
 keda:
   enabled: true
-  minReplicaCount: 2
-  maxReplicaCount: 10
+  minReplicaCount: 1
+  maxReplicaCount: 8
   pollingInterval: 30
-  cooldownPeriod: 300
+  cooldownPeriod: 600
   bootstrapServers: kafka:9092
   consumerGroup: notification-service-group
-  lagThreshold: 50
+  lagThreshold: 100
   topics:
     - trip_created
     - driver_assigned
