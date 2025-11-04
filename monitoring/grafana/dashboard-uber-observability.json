@@ -1,0 +1,48 @@
+{
+  "title": "Uber Backend Observability",
+  "timezone": "browser",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "HTTP request duration P95 (booking)",
+      "targets": [
+        {"expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{application=\"booking-service\"}[5m])) by (le))"}
+      ],
+      "gridPos": {"x":0, "y":0, "w":12, "h":8}
+    },
+    {
+      "type": "graph",
+      "title": "HTTP 5xx rate (booking)",
+      "targets": [
+        {"expr": "sum(rate(http_server_requests_seconds_count{application=\"booking-service\", status=~\"5..\"}[5m]))"}
+      ],
+      "gridPos": {"x":12, "y":0, "w":12, "h":8}
+    },
+    {
+      "type": "graph",
+      "title": "Kafka consumer lag (all groups)",
+      "targets": [
+        {"expr": "kafka_consumergroup_lag"}
+      ],
+      "gridPos": {"x":0, "y":8, "w":24, "h":8}
+    },
+    {
+      "type": "graph",
+      "title": "Trips created per minute",
+      "targets": [
+        {"expr": "sum(rate(trips_created_total[5m]))"}
+      ],
+      "gridPos": {"x":0, "y":16, "w":12, "h":8}
+    },
+    {
+      "type": "graph",
+      "title": "Trips assigned per minute",
+      "targets": [
+        {"expr": "sum(rate(trips_assigned_total[5m]))"}
+      ],
+      "gridPos": {"x":12, "y":16, "w":12, "h":8}
+    }
+  ],
+  "schemaVersion": 38,
+  "version": 1
+}
