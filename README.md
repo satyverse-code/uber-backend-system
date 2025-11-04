@@ -52,3 +52,8 @@ uber-backend-system/
 ## Next Weeks
 
 - Week 1: Ride Booking Module (controllers, models, repositories, Flyway)
+
+## Documentation
+
+- Week 2: Domain Modeling, ERD, and Kafka Event Flow
+  - See docs/WEEK-2-Domain-Modeling-and-Event-Flow.md
