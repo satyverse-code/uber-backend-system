@@ -9,12 +9,15 @@ import com.uber.backend.events.DriverAssignedEvent;
 import com.uber.backend.kafka.TripEventProducer;
 import com.uber.backend.store.ProcessedEvent;
 import com.uber.backend.store.ProcessedEventRepository;
+import com.uber.backend.metrics.BookingMetrics;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.Instant;
+import java.time.Duration;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -26,15 +29,18 @@ public class RideService {
     private final TripEventProducer tripEventProducer;
     private final ProcessedEventRepository processedEventRepository;
     private final MeterRegistry meterRegistry;
+    private final BookingMetrics bookingMetrics;
 
     public RideService(RideRepository rideRepository,
                        TripEventProducer tripEventProducer,
                        ProcessedEventRepository processedEventRepository,
-                       MeterRegistry meterRegistry) {
+                       MeterRegistry meterRegistry,
+                       BookingMetrics bookingMetrics) {
         this.rideRepository = rideRepository;
         this.tripEventProducer = tripEventProducer;
         this.processedEventRepository = processedEventRepository;
         this.meterRegistry = meterRegistry;
+        this.bookingMetrics = bookingMetrics;
     }
 
     @Transactional
@@ -49,6 +55,7 @@ public class RideService {
         Ride saved = rideRepository.save(ride);
 
         meterRegistry.counter("trips_created_total").increment();
+        bookingMetrics.incRequested();
 
         TripCreatedEvent event = new TripCreatedEvent(
                 UUID.randomUUID().toString(),
@@ -84,7 +91,14 @@ public class RideService {
             ride.setStatus("ASSIGNED");
             rideRepository.save(ride);
             meterRegistry.counter("trips_assigned_total").increment();
+            bookingMetrics.incAssigned();
+            // record latency from ride creation to assignment
+            LocalDateTime created = ride.getCreatedAt();
+            LocalDateTime assignedLocal = LocalDateTime.ofInstant(assignedAt, ZoneId.systemDefault());
+            Duration latency = Duration.between(created, assignedLocal);
+            bookingMetrics.recordAssignmentLatency(latency);
         }
         processedEventRepository.save(new ProcessedEvent(eventId, "driver_assigned"));
     }
 }
+
