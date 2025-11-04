@@ -1,0 +1,21 @@
+{{- if and .Values.rollout.enabled .Values.rollout.analysis.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: {{ .Values.rollout.analysis.templateName }}
+spec:
+  metrics:
+    - name: success-rate
+      interval: {{ .Values.rollout.analysis.interval }}
+      successCondition: result[0] >= 0.95
+      failureLimit: {{ .Values.rollout.analysis.maxFailed }}
+      provider:
+        prometheus:
+          address: {{ .Values.rollout.analysis.prometheusAddress }}
+          query: |
+            1 - (
+              sum(rate(http_server_requests_seconds_count{application="gateway-service",status=~"5.."}[1m]))
+              /
+              sum(rate(http_server_requests_seconds_count{application="gateway-service"}[1m]))
+            )
+{{- end }}

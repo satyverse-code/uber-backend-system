@@ -60,3 +60,15 @@ env:
   REDIS_PORT: "6379"
   RATE_LIMIT_REPLENISH: "50"
   RATE_LIMIT_BURST: "100"
+
+rollout:
+  enabled: false
+  canary:
+    setWeight: 20
+    pauseSeconds: 60
+  analysis:
+    enabled: true
+    templateName: gateway-success-rate
+    prometheusAddress: http://prometheus-server.monitoring:80
+    maxFailed: 1
+    interval: 60s

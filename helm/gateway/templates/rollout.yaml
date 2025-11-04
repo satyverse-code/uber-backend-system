@@ -1,16 +1,26 @@
-apiVersion: apps/v1
-kind: Deployment
+{{- if .Values.rollout.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   name: {{ include "gateway.fullname" . }}
-  labels: {{- include "gateway.labels" . | nindent 4 }}
-{{- if not .Values.rollout.enabled }}
+  labels:
+    app: {{ include "gateway.name" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
 spec:
   replicas: {{ .Values.replicaCount }}
   strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 0
+    canary:
+      canaryService: {{ include "gateway.fullname" . }}-canary
+      stableService: {{ include "gateway.fullname" . }}
+      steps:
+        - setWeight: {{ .Values.rollout.canary.setWeight }}
+        - pause: { duration: {{ .Values.rollout.canary.pauseSeconds }} }
+        {{- if .Values.rollout.analysis.enabled }}
+        - analysis:
+            templates:
+              - templateName: {{ .Values.rollout.analysis.templateName }}
+            args: []
+        {{- end }}
   selector:
     matchLabels:
       app: {{ include "gateway.name" . }}
@@ -18,7 +28,6 @@ spec:
     metadata:
       labels:
         app: {{ include "gateway.name" . }}
-        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     spec:
       serviceAccountName: {{ include "gateway.serviceAccountName" . }}
       containers:
