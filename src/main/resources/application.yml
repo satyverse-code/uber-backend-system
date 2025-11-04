@@ -3,6 +3,11 @@ spring:
     url: jdbc:postgresql://localhost:5432/uberdb
     username: uberuser
     password: uberpass
+    hikari:
+      pool-name: booking-hikari
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
   jpa:
     hibernate:
       ddl-auto: none
@@ -17,20 +22,33 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        acks: all
+        linger.ms: 20
+        batch.size: 32768
+        enable.idempotence: true
     consumer:
       group-id: booking-service-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "*"
+        max.poll.records: 500
+        fetch.min.bytes: 1048576
+        fetch.max.wait.ms: 500
+        enable.auto.commit: false
     listener:
       concurrency: 3
+      ack-mode: BATCH
   sql:
     init:
       mode: always
 
 server:
   port: 8080
+  tomcat:
+    threads:
+      max: 200
 
 management:
   endpoints:
