@@ -7,6 +7,10 @@ import com.uber.orchestrator.saga.Saga;
 import com.uber.orchestrator.saga.SagaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 
 import java.time.Instant;
 import java.util.Map;
@@ -27,6 +31,10 @@ public class OrchestratorService {
     }
 
     @Transactional
+    @CircuitBreaker(name = "bookingCreateCB", fallbackMethod = "startSagaFallback")
+    @Retry(name = "bookingCreateCB")
+    @RateLimiter(name = "bookingCreateRate")
+    @Bulkhead(name = "bookingCreateBulkhead")
     public Map<String, Object> startSaga(StartSagaRequest req) {
         String sagaId = UUID.randomUUID().toString();
         Long tripId = bookingClient.createRide(req.getRiderId(), req.getPickup(), req.getDropoff());
@@ -39,6 +47,10 @@ public class OrchestratorService {
     }
 
     @Transactional
+    @CircuitBreaker(name = "driverReserveCB", fallbackMethod = "reserveDriverFallback")
+    @Retry(name = "driverReserveCB")
+    @RateLimiter(name = "driverReserveRate")
+    @Bulkhead(name = "driverReserveBulkhead")
     public Map<String, Object> reserveDriver(String sagaId) {
         Saga saga = getSagaOrThrow(sagaId);
         Long driverId = driverClient.reserveNearest(
@@ -85,5 +97,26 @@ public class OrchestratorService {
     private Saga getSagaOrThrow(String sagaId) {
         Optional<Saga> opt = sagaRepository.findById(sagaId);
         return opt.orElseThrow(() -> new IllegalArgumentException("Saga not found: " + sagaId));
+    }
+
+    // Fallbacks
+    private Map<String, Object> startSagaFallback(StartSagaRequest req, Throwable ex) {
+        String sagaId = UUID.randomUUID().toString();
+        Saga saga = new Saga(sagaId, null, "CANCELLED");
+        saga.setPickupLat(req.getLat());
+        saga.setPickupLng(req.getLng());
+        saga.setLastError(ex != null ? ex.getClass().getSimpleName() + ": " + ex.getMessage() : "UNKNOWN_ERROR");
+        saga.setUpdatedAt(Instant.now());
+        sagaRepository.save(saga);
+        return Map.of("sagaId", sagaId, "error", saga.getLastError(), "state", saga.getState());
+    }
+
+    private Map<String, Object> reserveDriverFallback(String sagaId, Throwable ex) {
+        Saga saga = getSagaOrThrow(sagaId);
+        saga.setState("CANCELLED");
+        saga.setLastError(ex != null ? ex.getClass().getSimpleName() + ": " + ex.getMessage() : "UNKNOWN_ERROR");
+        saga.setUpdatedAt(Instant.now());
+        sagaRepository.save(saga);
+        return Map.of("sagaId", sagaId, "tripId", saga.getTripId(), "state", saga.getState(), "error", saga.getLastError());
     }
 }

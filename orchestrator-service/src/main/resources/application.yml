@@ -25,6 +25,12 @@ spring:
 resilience4j:
   circuitbreaker:
     instances:
+      bookingCreateCB:
+        failureRateThreshold: 50
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 20
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
       driverReserveCB:
         failureRateThreshold: 50
         slidingWindowType: COUNT_BASED
@@ -33,6 +39,9 @@ resilience4j:
         permittedNumberOfCallsInHalfOpenState: 3
   retry:
     instances:
+      bookingCreateCB:
+        maxAttempts: 3
+        waitDuration: 300ms
       driverReserveCB:
         maxAttempts: 3
         waitDuration: 300ms
@@ -40,6 +49,24 @@ resilience4j:
     instances:
       driverReserveCB:
         timeoutDuration: 2s
+  ratelimiter:
+    instances:
+      bookingCreateRate:
+        limitForPeriod: 10
+        limitRefreshPeriod: 1s
+        timeoutDuration: 0
+      driverReserveRate:
+        limitForPeriod: 20
+        limitRefreshPeriod: 1s
+        timeoutDuration: 0
+  bulkhead:
+    instances:
+      bookingCreateBulkhead:
+        maxConcurrentCalls: 10
+        maxWaitDuration: 0
+      driverReserveBulkhead:
+        maxConcurrentCalls: 20
+        maxWaitDuration: 0
 
 management:
   endpoints:
