@@ -26,6 +26,19 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.port }}
+          env:
+            - name: JWT_ENABLED
+              value: "{{ .Values.env.JWT_ENABLED }}"
+            - name: JWK_SET_URI
+              value: "{{ .Values.env.JWK_SET_URI }}"
+            - name: REDIS_HOST
+              value: "{{ .Values.env.REDIS_HOST }}"
+            - name: REDIS_PORT
+              value: "{{ .Values.env.REDIS_PORT }}"
+            - name: RATE_LIMIT_REPLENISH
+              value: "{{ .Values.env.RATE_LIMIT_REPLENISH }}"
+            - name: RATE_LIMIT_BURST
+              value: "{{ .Values.env.RATE_LIMIT_BURST }}"
           resources:
             requests:
               memory: {{ .Values.resources.requests.memory }}

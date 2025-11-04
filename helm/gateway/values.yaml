@@ -52,3 +52,11 @@ monitoring:
 pdb:
   enabled: true
   minAvailable: 1
+
+env:
+  JWT_ENABLED: "false"
+  JWK_SET_URI: "http://keycloak:8080/realms/uber/protocol/openid-connect/certs"
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  RATE_LIMIT_REPLENISH: "50"
+  RATE_LIMIT_BURST: "100"
