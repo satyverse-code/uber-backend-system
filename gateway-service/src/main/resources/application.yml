@@ -4,10 +4,24 @@ server:
 spring:
   application:
     name: gateway-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${JWK_SET_URI:http://keycloak:8080/realms/uber/protocol/openid-connect/certs}
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
   cloud:
     gateway:
       default-filters:
         - PreserveHostHeader
+        - name: RequestRateLimiter
+          args:
+            redis-rate-limiter.replenishRate: ${RATE_LIMIT_REPLENISH:50}
+            redis-rate-limiter.burstCapacity: ${RATE_LIMIT_BURST:100}
+            key-resolver: "#{@remoteAddressResolver}"
       routes:
         - id: booking
           uri: http://booking:8080
@@ -47,4 +61,4 @@ management:
 
 # Security placeholder for JWT readiness
 jwt:
-  enabled: false
+  enabled: ${JWT_ENABLED:false}
