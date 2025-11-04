@@ -1,0 +1,21 @@
+global:
+  postgresql:
+    auth:
+      username: uberuser
+      password: uberpass
+      database: uberdb
+
+primary:
+  persistence:
+    enabled: true
+    size: 5Gi
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+volumePermissions:
+  enabled: true
