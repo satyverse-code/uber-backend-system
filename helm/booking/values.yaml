@@ -41,6 +41,13 @@ env:
   SPRING_PROFILES_ACTIVE: k8s
   SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/uberdb
   SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+  ANALYTICS_EXPORT_ENABLED: "false"
+  ANALYTICS_S3_BUCKET: ""
+  ANALYTICS_S3_PREFIX: "trip-events/"
+  AWS_REGION: "us-east-1"
+  # Provide keys via external secret manager in real deployments
+  AWS_ACCESS_KEY_ID: ""
+  AWS_SECRET_ACCESS_KEY: ""
 
 hpa:
   enabled: true
