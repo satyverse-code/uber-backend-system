@@ -1,0 +1,62 @@
+name: Deploy (Helm)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment/namespace"
+        required: true
+        default: "uber"
+      imageTag:
+        description: "Docker image tag for all services"
+        required: true
+        default: "latest"
+  push:
+    branches: [ "week-6" ]
+    paths:
+      - 'helm/**'
+      - '.github/workflows/deploy.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      KUBECONFIG_FILE: ${{ secrets.KUBE_CONFIG }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+
+      - name: Configure kubeconfig
+        if: env.KUBECONFIG_FILE != ''
+        run: |
+          echo "$KUBECONFIG_FILE" | base64 -d > kubeconfig
+          echo "KUBECONFIG=$GITHUB_WORKSPACE/kubeconfig" >> $GITHUB_ENV
+
+      - name: Create namespace if not exists
+        run: |
+          kubectl get ns ${{ github.event.inputs.environment || 'uber' }} || \
+          kubectl create ns ${{ github.event.inputs.environment || 'uber' }}
+
+      - name: Upgrade/Install booking-service
+        run: |
+          helm upgrade --install booking helm/booking \
+            --namespace ${{ github.event.inputs.environment || 'uber' }} \
+            --set image.tag=${{ github.event.inputs.imageTag || 'latest' }}
+
+      - name: Upgrade/Install orchestrator-service
+        run: |
+          helm upgrade --install orchestrator helm/orchestrator \
+            --namespace ${{ github.event.inputs.environment || 'uber' }} \
+            --set image.tag=${{ github.event.inputs.imageTag || 'latest' }}
+
+      - name: Upgrade/Install notification-service
+        run: |
+          helm upgrade --install notification helm/notification \
+            --namespace ${{ github.event.inputs.environment || 'uber' }} \
+            --set image.tag=${{ github.event.inputs.imageTag || 'latest' }}
