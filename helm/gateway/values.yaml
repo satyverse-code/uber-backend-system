@@ -67,6 +67,13 @@ env:
   RATE_LIMIT_NOTIF_REPLENISH: "30"
   RATE_LIMIT_NOTIF_BURST: "60"
 
+secrets:
+  create: false
+  name: ""
+  data:
+    JWK_SET_URI: ""
+    REDIS_PASSWORD: ""
+
 rollout:
   enabled: false
   canary:

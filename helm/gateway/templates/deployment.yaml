@@ -27,15 +27,29 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.port }}
+          {{- if or .Values.secrets.create .Values.secrets.name }}
+          envFrom:
+            - secretRef:
+                name: {{- if .Values.secrets.name -}}{{ .Values.secrets.name }}{{- else -}}{{ include "gateway.fullname" . }}-secret{{- end }}
+          {{- end }}
           env:
             - name: JWT_ENABLED
               value: "{{ .Values.env.JWT_ENABLED }}"
+            {{- if not (or .Values.secrets.create .Values.secrets.name) }}
             - name: JWK_SET_URI
               value: "{{ .Values.env.JWK_SET_URI }}"
+            {{- end }}
             - name: REDIS_HOST
               value: "{{ .Values.env.REDIS_HOST }}"
             - name: REDIS_PORT
               value: "{{ .Values.env.REDIS_PORT }}"
+            {{- if not (or .Values.secrets.create .Values.secrets.name) }}
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{- if .Values.secrets.name -}}{{ .Values.secrets.name }}{{- else -}}{{ include "gateway.fullname" . }}-secret{{- end }}
+                  key: REDIS_PASSWORD
+            {{- end }}
             - name: RATE_LIMIT_REPLENISH
               value: "{{ .Values.env.RATE_LIMIT_REPLENISH }}"
             - name: RATE_LIMIT_BURST
