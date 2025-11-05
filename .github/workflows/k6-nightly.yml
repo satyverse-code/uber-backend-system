@@ -1,0 +1,38 @@
+name: k6 Nightly Load Test
+
+on:
+  schedule:
+    - cron: '0 1 * * *'  # nightly at 01:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: k6-nightly
+  cancel-in-progress: false
+
+jobs:
+  k6-load:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run k6 booking load test
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: k6/booking_load_test.js
+        env:
+          BASE_URL: ${{ secrets.K6_BASE_URL }}
+          AUTH_TOKEN: ${{ secrets.K6_AUTH_TOKEN }}
+
+      - name: Archive k6 results (optional)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-results
+          path: |
+            ./summary.json
+            ./summary.html
+        continue-on-error: true
