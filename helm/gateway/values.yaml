@@ -45,7 +45,7 @@ hpa:
 
 monitoring:
   serviceMonitor:
-    enabled: false
+    enabled: true
     namespace: ""
     extraLabels: {}
 

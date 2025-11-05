@@ -67,6 +67,6 @@ keda:
 # Optional ServiceMonitor (for kube-prometheus-stack users)
 monitoring:
   serviceMonitor:
-    enabled: false
+    enabled: true
     namespace: ""
     extraLabels: {}
