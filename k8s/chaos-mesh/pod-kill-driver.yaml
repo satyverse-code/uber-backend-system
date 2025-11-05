@@ -1,0 +1,14 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: driver-pod-kill
+  namespace: uber
+spec:
+  action: pod-kill
+  mode: one
+  selector:
+    namespaces:
+      - uber
+    labelSelectors:
+      app: driver-service
+  duration: "30s"

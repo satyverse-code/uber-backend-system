@@ -1,0 +1,26 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: net-delay-booking-orchestrator
+  namespace: uber
+spec:
+  action: delay
+  mode: all
+  selector:
+    namespaces:
+      - uber
+    labelSelectors:
+      app: booking-service
+  target:
+    selector:
+      namespaces:
+        - uber
+      labelSelectors:
+        app: orchestrator-service
+    mode: all
+  delay:
+    latency: '2000ms'
+    correlation: '0'
+    jitter: '0ms'
+  direction: to
+  duration: '5m'
