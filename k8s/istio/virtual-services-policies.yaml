@@ -1,0 +1,59 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: booking-vs
+  namespace: uber
+spec:
+  hosts:
+    - booking.uber.svc.cluster.local
+  http:
+    - timeout: 3s
+      retries:
+        attempts: 3
+        perTryTimeout: 1s
+        retryOn: 5xx,connect-failure,reset,refused-stream
+      route:
+        - destination:
+            host: booking.uber.svc.cluster.local
+            port:
+              number: 8080
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: orchestrator-vs
+  namespace: uber
+spec:
+  hosts:
+    - orchestrator.uber.svc.cluster.local
+  http:
+    - timeout: 3s
+      retries:
+        attempts: 3
+        perTryTimeout: 1s
+        retryOn: 5xx,connect-failure,reset,refused-stream
+      route:
+        - destination:
+            host: orchestrator.uber.svc.cluster.local
+            port:
+              number: 8090
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: notification-vs
+  namespace: uber
+spec:
+  hosts:
+    - notification.uber.svc.cluster.local
+  http:
+    - timeout: 3s
+      retries:
+        attempts: 3
+        perTryTimeout: 1s
+        retryOn: 5xx,connect-failure,reset,refused-stream
+      route:
+        - destination:
+            host: notification.uber.svc.cluster.local
+            port:
+              number: 8092
